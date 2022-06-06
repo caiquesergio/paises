@@ -5,6 +5,7 @@
       <img src="../assets/return_button.png" class="btn-return" />
     </div>
     <div>
+      <label class="label-filter">Filtrar por</label>
       <select v-model="selectedFilter" class="filter">
         <option disabled value="">Escolha uma opção</option>
         <option>Região</option>
@@ -14,6 +15,9 @@
         <option>Código de ligação</option>
       </select>
 
+      <label v-if="selectedFilter == 'Região'" class="label-option"
+        >Região</label
+      >
       <select
         class="option-select"
         v-if="selectedFilter == 'Região'"
@@ -24,6 +28,9 @@
         </option>
       </select>
 
+      <label v-if="selectedFilter == 'Capital'" class="label-option"
+        >Capital</label
+      >
       <select
         class="option-select"
         v-if="selectedFilter == 'Capital'"
@@ -34,6 +41,9 @@
         </option>
       </select>
 
+      <label v-if="selectedFilter == 'Língua'" class="label-option"
+        >Língua</label
+      >
       <select
         class="option-select"
         v-if="selectedFilter == 'Língua'"
@@ -44,6 +54,7 @@
         </option>
       </select>
 
+      <label v-if="selectedFilter == 'País'" class="label-option">País</label>
       <select
         class="option-select"
         v-if="selectedFilter == 'País'"
@@ -54,6 +65,9 @@
         </option>
       </select>
 
+      <label v-if="selectedFilter == 'Código de ligação'" class="label-option"
+        >Código de ligação</label
+      >
       <select
         class="option-select"
         v-if="selectedFilter == 'Código de ligação'"
@@ -64,20 +78,23 @@
         </option>
       </select>
 
-      <button class="btn-pesquisar" @click="getCountries()">PESQUISAR</button>
+      <button class="btn-pesquisar" @click="get()">PESQUISAR</button>
 
       <div class="overflow-auto" style="margin-top: 340px">
-        <div>
-          <router-link to="/countrie-selected" style="display: flex">
-            <div :key="index" v-for="(item, index) in flags">
-              <img :src="item" alt="" class="flags" style="padding: 20px" />
-            </div>
-          </router-link>
+        <div style="display: flex">
+          <div
+            :key="index"
+            v-for="(item, index) in renderedFlags"
+            @click="shareDetailsFlag(index)"
+            class="col-md-4"
+          >
+            <img :src="item" alt="" class="flags" style="padding: 20px" />
+          </div>
         </div>
       </div>
 
       <jw-pagination
-        :items="exampleItems"
+        :items="flags"
         :pageSize="12"
         @changePage="onChangePage"
       ></jw-pagination>
@@ -87,24 +104,17 @@
 <script>
 import axios from "axios";
 
-let exampleItems = [...Array(150).keys()].map((i) => ({
-  id: i + 1,
-  name: "item " + (i + 1),
-  flags: this.flags,
-}));
-
 export default {
   data() {
     return {
-      exampleItems,
-      baseUrl: "",
       regionSelected: "",
       capitalSelected: "",
       languageSelected: "",
       countriesSelected: "",
       codeSelected: "",
       flags: [],
-      //infos: [],
+      renderedFlags: [],
+      infos: [],
       regions: [],
       capitals: [],
       languages: [],
@@ -124,30 +134,93 @@ export default {
   name: "HelloWorld",
   computed: {},
   mounted() {
-    this.getCountries();
+    axios.defaults.baseURL = "https://restcountries.com/v3.1";
+    this.get();
   },
   methods: {
-    onChangePage(flags) {
-      this.flags = flags;
-      console.log("AQUI", this.flags);
+    shareDetailsFlag(index) {
+      let parameter = this.infos[index];
+      this.$router.push({
+        name: "DetailsCountries",
+        params: { data: parameter },
+      });
     },
 
-    getCountries() {
-      if (this.selectedFilter == "Região") {
-        this.baseUrl = `https://restcountries.com/v3.1/region/${this.regionSelected}`;
-      } else if (this.selectedFilter == "Capital") {
-        this.baseUrl = `https://restcountries.com/v3.1/capital/${this.capitalSelected}`;
-      } else if (this.selectedFilter == "Língua") {
-        this.baseUrl = `https://restcountries.com/v3.1/lang/${this.languageSelected}`;
-      } else if (this.selectedFilter == "País") {
-        this.baseUrl = `https://restcountries.com/v3.1/name/${this.countriesSelected}`;
-      } else if (this.selectedFilter == "Código de ligação") {
-        this.baseUrl = `https://restcountries.com/v3.1/alpha/${this.codesFiltered}`;
-      } else {
-        this.baseUrl = `https://restcountries.com/v3.1/all`;
-      }
+    onChangePage(flags) {
+      this.renderedFlags = flags;
+    },
+    getRegions() {
+      axios.get(`/region/${this.regionSelected}`).then((response) => {
+        this.infos = [];
+        response.data.forEach((item) => {
+          this.infos.push(item);
+        });
 
-      axios.get(this.baseUrl).then((response) => {
+        if (this.flags.length > 0) {
+          this.flags = [];
+        }
+
+        this.flags = this.infos.map((value) => value.flags.png);
+      });
+    },
+    getCountries() {
+      axios.get(`/name/${this.countriesSelected}`).then((response) => {
+        this.infos = [];
+        response.data.forEach((item) => {
+          this.infos.push(item);
+        });
+
+        if (this.flags.length > 0) {
+          this.flags = [];
+        }
+
+        this.flags = this.infos.map((value) => value.flags.png);
+      });
+    },
+    getLanguages() {
+      axios.get(`/lang/${this.languageSelected}`).then((response) => {
+        this.infos = [];
+        response.data.forEach((item) => {
+          this.infos.push(item);
+        });
+
+        if (this.flags.length > 0) {
+          this.flags = [];
+        }
+
+        this.flags = this.infos.map((value) => value.flags.png);
+      });
+    },
+    getCodes() {
+      axios.get(`/alpha/${this.codesFiltered}`).then((response) => {
+        this.infos = [];
+        response.data.forEach((item) => {
+          this.infos.push(item);
+        });
+
+        if (this.flags.length > 0) {
+          this.flags = [];
+        }
+
+        this.flags = this.infos.map((value) => value.flags.png);
+      });
+    },
+    getCapitals() {
+      axios.get(`/capital/${this.capitalSelected}`).then((response) => {
+        this.infos = [];
+        response.data.forEach((item) => {
+          this.infos.push(item);
+        });
+
+        if (this.flags.length > 0) {
+          this.flags = [];
+        }
+
+        this.flags = this.infos.map((value) => value.flags.png);
+      });
+    },
+    getAll() {
+      axios.get(`/all`).then((response) => {
         this.infos = [];
         response.data.forEach((item) => {
           this.infos.push(item);
@@ -188,6 +261,21 @@ export default {
           }
         });
       });
+    },
+    get() {
+      if (this.selectedFilter == "Região") {
+        this.getRegions();
+      } else if (this.selectedFilter == "Capital") {
+        this.getCapitals();
+      } else if (this.selectedFilter == "Língua") {
+        this.getLanguages();
+      } else if (this.selectedFilter == "País") {
+        this.getCountries();
+      } else if (this.selectedFilter == "Código de ligação") {
+        this.getCodes();
+      } else {
+        this.getAll();
+      }
     },
   },
 };
@@ -247,5 +335,74 @@ export default {
 .flags {
   width: 316px;
   height: 181px;
+}
+.label-filter {
+  color: #6d2080;
+  position: absolute;
+  top: 190px;
+  left: 175px;
+}
+.label-option {
+  color: #6d2080;
+  position: absolute;
+  top: 190px;
+  left: 565px;
+}
+.pagination {
+  margin-top: 50px;
+  place-content: center;
+  display: flex;
+  padding-left: 0;
+  list-style: none;
+}
+.pagination first {
+  display: none;
+}
+@media (max-width: 900px) {
+  .label-option {
+    color: #6d2080;
+    position: absolute;
+    top: 200px;
+    left: 26px;
+  }
+  .label-filter {
+    color: #6d2080;
+    position: absolute;
+    top: 130px;
+    left: 25px;
+  }
+  .filter[data-v-8dc7cce2] {
+    position: absolute;
+    width: 316px;
+    height: 41.01px;
+    left: 26px;
+    top: 155px;
+  }
+  .btn-pesquisar[data-v-8dc7cce2] {
+    position: absolute;
+    width: 156px;
+    height: 36px;
+    top: 293px;
+    left: 218px;
+    background: #6d2080;
+    color: #ffffff;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .btn-return[data-v-8dc7cce2] {
+    position: absolute;
+    left: 61.6%;
+    right: 4.47%;
+    top: 32%;
+    bottom: 32%;
+    cursor: pointer;
+  }
+  .option-select[data-v-8dc7cce2] {
+    position: absolute;
+    width: 316px;
+    height: 41.01px;
+    left: 27px;
+    top: 225px;
+  }
 }
 </style>

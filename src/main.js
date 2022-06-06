@@ -16,7 +16,7 @@ Vue.component('jw-pagination', JwPagination);
 Vue.config.productionTip = false
 
 const routes = [
-  { path: '/', name: 'Home' ,component: Home },
+  { path: '/', name: 'Home' , component: Home },
   { path: '/countrie-selected', name: 'DetailsCountries' ,component: DetailsCountries }
 ]
 
