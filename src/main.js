@@ -8,7 +8,7 @@ import JwPagination from 'jw-vue-pagination';
 
 
 import Home from './components/Home.vue'
-import DetailsCountries from './components/DetailsCountries.vue'
+import Username from './components/Username.vue'
 
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)
@@ -17,7 +17,7 @@ Vue.config.productionTip = false
 
 const routes = [
   { path: '/', name: 'Home' , component: Home },
-  { path: '/countrie-selected', name: 'DetailsCountries' ,component: DetailsCountries }
+  { path: '/username', name: 'Username' ,component: Username }
 ]
 
 const router = new VueRouter({
